@@ -621,7 +621,7 @@ export default function App() {
       <PlayerBar 
         activeTrack={activeTrack}
         isPlaying={isPlaying}
-        onPlayPause={handlePlayPause}
+        onPlayPause={() => setIsPlaying(!isPlaying)}
         onNext={playNextTrack}
         onPrev={playPrevTrack}
         volume={volume}
@@ -727,7 +727,7 @@ export default function App() {
               </button>
               <button 
                 className="fullscreen-btn play-btn" 
-                onClick={handlePlayPause}
+                onClick={() => setIsPlaying(!isPlaying)}
               >
                 {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" style={{ marginLeft: '4px' }} />}
               </button>
