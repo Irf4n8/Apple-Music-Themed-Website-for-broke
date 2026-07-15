@@ -1,24 +1,62 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, Link2, Disc } from 'lucide-react';
 
-// Helper to parse custom lyrics (spaced dynamically or line-by-line)
-const parseCustomLyrics = (rawText, title, artist) => {
-  if (!rawText || !rawText.trim()) {
-    return [
-      { time: 0, text: '🎵 (Playing Custom Track)' },
-      { time: 5, text: `Listening to ${title || 'Untitled Song'}` },
-      { time: 10, text: `by ${artist || 'Unknown Artist'}` },
-      { time: 15, text: 'Enjoy the music!' }
-    ];
-  }
+// Helper to parse custom lyrics (supporting standard LRC timestamps like [00:12.30] or [12.34])
+const parseCustomLyrics = (rawText) => {
+  if (!rawText || !rawText.trim()) return [];
+  
   const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  if (lines.length === 0) {
-    return [{ time: 0, text: '🎵 (Playing Custom Track)' }];
+  const parsedLines = [];
+  
+  // Regex to match:
+  // 1. LRC standard: [00:12.34] text or [01:15] text
+  // 2. Direct seconds in brackets: [12.34] text
+  const lrcRegex = /^\[(\d+):(\d+(?:\.\d+)?)\](.*)/;
+  const secRegex = /^\[(\d+(?:\.\d+)?)\](.*)/;
+  
+  let hasTimestamps = false;
+  
+  for (const line of lines) {
+    const lrcMatch = line.match(lrcRegex);
+    if (lrcMatch) {
+      hasTimestamps = true;
+      const minutes = parseInt(lrcMatch[1], 10);
+      const seconds = parseFloat(lrcMatch[2]);
+      const text = lrcMatch[3].trim();
+      parsedLines.push({ time: minutes * 60 + seconds, text });
+      continue;
+    }
+    
+    const secMatch = line.match(secRegex);
+    if (secMatch) {
+      hasTimestamps = true;
+      const seconds = parseFloat(secMatch[1]);
+      const text = secMatch[2].trim();
+      parsedLines.push({ time: seconds, text });
+      continue;
+    }
+    
+    // If no timestamp is found, push with time -1 to process later
+    parsedLines.push({ time: -1, text: line });
   }
   
-  // Distribute lines over a default interval (6s per line)
+  if (hasTimestamps) {
+    let lastTime = 0;
+    return parsedLines
+      .map((item) => {
+        if (item.time === -1) {
+          lastTime += 5; // Default spacing for untimestamped lines
+          return { time: lastTime, text: item.text };
+        }
+        lastTime = item.time;
+        return item;
+      })
+      .sort((a, b) => a.time - b.time);
+  }
+  
+  // Default fallback: space lines evenly every 5 seconds
   return lines.map((lineText, index) => ({
-    time: index * 6,
+    time: index * 5,
     text: lineText
   }));
 };

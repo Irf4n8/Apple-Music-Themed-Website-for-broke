@@ -8,7 +8,7 @@ export const songs = [
     url: 'https://www.youtube.com/watch?v=5qap5aO4i9A',
     duration: 320,
     lyrics: [
-      { time: 0, text: '🎵 (Ambient Intro: Rain and Soft Piano)' },
+      { time: 0, text: '(Ambient Intro: Rain and Soft Piano)' },
       { time: 15, text: 'Welcome to your deep focus session' },
       { time: 22, text: 'Feel the raindrops hit the window pane' },
       { time: 30, text: 'Let the quiet melodies wash away the strain' },
@@ -16,12 +16,12 @@ export const songs = [
       { time: 46, text: 'Bringing harmony back into your soul' },
       { time: 54, text: 'No words needed, just let it slide' },
       { time: 62, text: 'With the music playing by your side' },
-      { time: 70, text: '🎵 (Soothing Trumpet Solo)' },
+      { time: 70, text: '(Soothing Trumpet Solo)' },
       { time: 95, text: 'Time moves slowly in this quiet room' },
       { time: 103, text: 'While the ambient echoes chase the gloom' },
       { time: 112, text: 'Keep on coding, reading, dreaming high' },
       { time: 120, text: 'Underneath this digital starry sky' },
-      { time: 128, text: '🎵 (Piano and Beats Outro)' }
+      { time: 128, text: '(Piano and Beats Outro)' }
     ]
   },
   {
@@ -33,7 +33,7 @@ export const songs = [
     url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
     duration: 372,
     lyrics: [
-      { time: 0, text: '🎵 (Instrumental Intro)' },
+      { time: 0, text: '(Instrumental Intro)' },
       { time: 15, text: 'Walking down the neon street' },
       { time: 21, text: 'Feel the rhythm under my feet' },
       { time: 27, text: 'City lights begin to glow' },
@@ -46,7 +46,7 @@ export const songs = [
       { time: 69, text: 'Dreaming of the things we crave' },
       { time: 75, text: 'In the cosmic drift we find' },
       { time: 81, text: 'All the thoughts we left behind' },
-      { time: 87, text: '🎵 (Synthesizer Solo)' },
+      { time: 87, text: '(Synthesizer Solo)' },
       { time: 110, text: 'Every shadow tells a tale' },
       { time: 116, text: 'On this glowing, silver trail' },
       { time: 122, text: 'Hear the echo in the wind' },
@@ -66,7 +66,7 @@ export const songs = [
     url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
     duration: 425,
     lyrics: [
-      { time: 0, text: '🎵 (Electronic Intro)' },
+      { time: 0, text: '(Electronic Intro)' },
       { time: 12, text: 'Press the pedal, feel the speed' },
       { time: 18, text: 'This is all the escape we need' },
       { time: 24, text: 'Headlights cutting through the dark' },
@@ -90,7 +90,7 @@ export const songs = [
     url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
     duration: 344,
     lyrics: [
-      { time: 0, text: '🎵 (Acoustic Intro)' },
+      { time: 0, text: '(Acoustic Intro)' },
       { time: 10, text: 'Warm air rustling through the trees' },
       { time: 16, text: 'Carried away on a summer breeze' },
       { time: 22, text: 'Golden hour paint on the wall' },
@@ -114,7 +114,7 @@ export const songs = [
     url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
     duration: 302,
     lyrics: [
-      { time: 0, text: '🎵 (Rain Ambient Intro)' },
+      { time: 0, text: '(Rain Ambient Intro)' },
       { time: 14, text: 'Raindrops falling on the glass' },
       { time: 20, text: 'Watching all the crowds pass' },
       { time: 26, text: 'Words unspoken, signs unclear' },
@@ -136,7 +136,7 @@ export const songs = [
     url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
     duration: 362,
     lyrics: [
-      { time: 0, text: '🎵 (80s Synth Intro)' },
+      { time: 0, text: '(80s Synth Intro)' },
       { time: 16, text: 'Insert a coin, start the game' },
       { time: 22, text: 'Flashing lights, high score name' },
       { time: 28, text: 'Eight-bit melodies in the air' },
@@ -156,7 +156,7 @@ export const songs = [
     url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
     duration: 384,
     lyrics: [
-      { time: 0, text: '🎵 (Wave Ambient Intro)' },
+      { time: 0, text: '(Wave Ambient Intro)' },
       { time: 12, text: 'Deep blue water, endless sky' },
       { time: 18, text: 'Where the ocean birds fly' },
       { time: 24, text: 'Listen to the crashing tide' },
@@ -176,7 +176,7 @@ export const songs = [
     url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
     duration: 351,
     lyrics: [
-      { time: 0, text: '🎵 (Soft Chill Intro)' },
+      { time: 0, text: '(Soft Chill Intro)' },
       { time: 15, text: 'Underneath the velvet dome' },
       { time: 22, text: 'A thousand lightyears away from home' },
       { time: 29, text: 'Floating in a sea of stars' },
@@ -196,7 +196,7 @@ export const songs = [
     url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
     duration: 395,
     lyrics: [
-      { time: 0, text: '🎵 (Ethereal Pads Intro)' },
+      { time: 0, text: '(Ethereal Pads Intro)' },
       { time: 18, text: 'Waking up inside a dream' },
       { time: 24, text: 'Nothing is quite what it seems' },
       { time: 30, text: 'Shadows dance upon the floor' },

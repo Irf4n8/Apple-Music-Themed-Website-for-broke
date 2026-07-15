@@ -205,10 +205,15 @@ export default function PlayerBar({
           {isPlaying ? <Pause size={22} /> : <Play size={22} />}
         </button>
 
-        <button 
+         <button 
           className={`extra-btn lyrics-toggle-btn ${lyricsOpen ? 'active' : ''}`}
           onClick={onLyricsToggle}
-          title="Lyrics"
+          disabled={!activeTrack || !activeTrack.lyrics || activeTrack.lyrics.length === 0}
+          title={activeTrack && activeTrack.lyrics && activeTrack.lyrics.length > 0 ? "Lyrics" : "Lyrics Not Available"}
+          style={{
+            opacity: activeTrack && activeTrack.lyrics && activeTrack.lyrics.length > 0 ? 1 : 0.4,
+            cursor: activeTrack && activeTrack.lyrics && activeTrack.lyrics.length > 0 ? 'pointer' : 'not-allowed'
+          }}
         >
           <AlignLeft size={18} />
         </button>
