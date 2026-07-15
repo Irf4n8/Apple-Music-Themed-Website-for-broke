@@ -248,7 +248,7 @@ export default function MainContent({
       <div className="main-wrapper">
         <div className="main-header">
           <div>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>WELCOME TO APPLE MUSIC</span>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>WELCOME TO MUSIC</span>
             <h1 className="section-title" style={{ fontSize: '2.2rem', marginTop: '2px' }}>Listen Now</h1>
           </div>
           <button className="theme-btn" onClick={onThemeToggle} title="Toggle Dark/Light Mode">
@@ -261,7 +261,7 @@ export default function MainContent({
           <span className="hero-tagline">EXCLUSIVE FEATURE</span>
           <h2 className="hero-title">Add Custom Music Instantly</h2>
           <p className="hero-desc">
-            Paste direct links to audio files or upload MP3 files from your device. Experiencing music exactly the way you want, with Apple Music aesthetics.
+            Paste direct links to audio files or upload MP3 files from your device. Experiencing music exactly the way you want, with a premium glassmorphic interface.
           </p>
           <button 
             className="btn btn-primary" 
@@ -302,7 +302,7 @@ export default function MainContent({
                 <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', textAlign: 'center', padding: '16px' }}>Favorites Mix</span>
               </div>
               <span className="card-title">Favorites Mix</span>
-              <span className="card-subtitle">Apple Music Hits</span>
+              <span className="card-subtitle">Vibe Hits</span>
             </div>
 
             <div className="card" onClick={() => onPlaySong(songs[2])}>

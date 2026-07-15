@@ -920,9 +920,11 @@ html, body, #root {
   letter-spacing: -0.03em;
   cursor: pointer;
   transform-origin: left center;
-  transition: color 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   color: rgba(255, 255, 255, 0.35);
   filter: blur(1px);
+  position: relative;
+  display: block;
 }
 
 [data-theme="light"] .lyrics-line {
@@ -930,12 +932,31 @@ html, body, #root {
 }
 
 .lyrics-line.active {
-  color: #ffffff;
   filter: blur(0);
   transform: scale(1.04);
+  color: transparent !important; /* Hide direct text, show background + fill spans */
 }
 
-[data-theme="light"] .lyrics-line.active {
+.lyrics-line-background {
+  color: rgba(255, 255, 255, 0.35);
+  transition: color 0.4s;
+}
+
+[data-theme="light"] .lyrics-line-background {
+  color: rgba(0, 0, 0, 0.25);
+}
+
+.lyrics-line-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  color: #ffffff;
+  pointer-events: none;
+  transition: clip-path 0.25s linear;
+}
+
+[data-theme="light"] .lyrics-line-fill {
   color: #1d1d1f;
 }
 

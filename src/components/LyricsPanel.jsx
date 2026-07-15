@@ -24,6 +24,22 @@ export default function LyricsPanel({
     }
   }
 
+  // Calculate sweep progress percent for the active line
+  let progressPercent = 0;
+  if (activeIndex !== -1) {
+    const currentLineTime = lyrics[activeIndex].time;
+    const nextLineTime = 
+      activeIndex < lyrics.length - 1 
+        ? lyrics[activeIndex + 1].time 
+        : (activeTrack?.duration || currentLineTime + 8);
+    
+    const lineDuration = nextLineTime - currentLineTime;
+    if (lineDuration > 0) {
+      progressPercent = ((currentTime - currentLineTime) / lineDuration) * 100;
+      progressPercent = Math.min(100, Math.max(0, progressPercent));
+    }
+  }
+
   // Smoothly center the active lyric line in the scroll container
   useEffect(() => {
     if (activeIndex !== -1 && scrollerRef.current) {
@@ -66,15 +82,30 @@ export default function LyricsPanel({
         {/* Right pane: scrolling lyrics */}
         <div className="lyrics-scroller" ref={scrollerRef}>
           {lyrics.length > 0 ? (
-            lyrics.map((line, idx) => (
-              <div
-                key={idx}
-                className={`lyrics-line ${idx === activeIndex ? 'active' : ''}`}
-                onClick={() => handleLineClick(line.time)}
-              >
-                {line.text}
-              </div>
-            ))
+            lyrics.map((line, idx) => {
+              const isActive = idx === activeIndex;
+              return (
+                <div
+                  key={idx}
+                  className={`lyrics-line ${isActive ? 'active' : ''}`}
+                  onClick={() => handleLineClick(line.time)}
+                >
+                  {isActive ? (
+                    <>
+                      <span className="lyrics-line-background">{line.text}</span>
+                      <span 
+                        className="lyrics-line-fill" 
+                        style={{ clipPath: `inset(0 ${100 - progressPercent}% 0 0)` }}
+                      >
+                        {line.text}
+                      </span>
+                    </>
+                  ) : (
+                    <span>{line.text}</span>
+                  )}
+                </div>
+              );
+            })
           ) : (
             <div 
               className="lyrics-line" 

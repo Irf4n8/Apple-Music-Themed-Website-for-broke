@@ -1,5 +1,30 @@
 export const songs = [
   {
+    id: 'yt-1',
+    title: 'Lofi Study Beats',
+    artist: 'Chilled Cow',
+    album: 'Lofi Study Session',
+    cover: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=500&q=80',
+    url: 'https://www.youtube.com/watch?v=5qap5aO4i9A',
+    duration: 320,
+    lyrics: [
+      { time: 0, text: '🎵 (Ambient Intro: Rain and Soft Piano)' },
+      { time: 15, text: 'Welcome to your deep focus session' },
+      { time: 22, text: 'Feel the raindrops hit the window pane' },
+      { time: 30, text: 'Let the quiet melodies wash away the strain' },
+      { time: 38, text: 'A smooth bassline begins to roll' },
+      { time: 46, text: 'Bringing harmony back into your soul' },
+      { time: 54, text: 'No words needed, just let it slide' },
+      { time: 62, text: 'With the music playing by your side' },
+      { time: 70, text: '🎵 (Soothing Trumpet Solo)' },
+      { time: 95, text: 'Time moves slowly in this quiet room' },
+      { time: 103, text: 'While the ambient echoes chase the gloom' },
+      { time: 112, text: 'Keep on coding, reading, dreaming high' },
+      { time: 120, text: 'Underneath this digital starry sky' },
+      { time: 128, text: '🎵 (Piano and Beats Outro)' }
+    ]
+  },
+  {
     id: '1',
     title: 'Neon Horizons',
     artist: 'Aether Echo',
