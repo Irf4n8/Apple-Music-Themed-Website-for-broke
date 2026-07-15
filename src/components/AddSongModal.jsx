@@ -1,6 +1,28 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, Link2, Disc } from 'lucide-react';
 
+// Helper to parse custom lyrics (spaced dynamically or line-by-line)
+const parseCustomLyrics = (rawText, title, artist) => {
+  if (!rawText || !rawText.trim()) {
+    return [
+      { time: 0, text: '🎵 (Playing Custom Track)' },
+      { time: 5, text: `Listening to ${title || 'Untitled Song'}` },
+      { time: 10, text: `by ${artist || 'Unknown Artist'}` },
+      { time: 15, text: 'Enjoy the music!' }
+    ];
+  }
+  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length === 0) {
+    return [{ time: 0, text: '🎵 (Playing Custom Track)' }];
+  }
+  
+  // Distribute lines over a default interval (6s per line)
+  return lines.map((lineText, index) => ({
+    time: index * 6,
+    text: lineText
+  }));
+};
+
 export default function AddSongModal({ isOpen, onClose, onAddSong }) {
   const [activeTab, setActiveTab] = useState('link'); // 'link' or 'upload'
   
@@ -10,6 +32,7 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
   const [songArtist, setSongArtist] = useState('');
   const [songAlbum, setSongAlbum] = useState('');
   const [songCover, setSongCover] = useState('');
+  const [songLyrics, setSongLyrics] = useState('');
 
   // Upload Tab State
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -18,6 +41,7 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
   const [uploadAlbum, setUploadAlbum] = useState('Uploaded Track');
   const [uploadCoverFile, setUploadCoverFile] = useState(null);
   const [uploadCoverUrl, setUploadCoverUrl] = useState('');
+  const [uploadLyrics, setUploadLyrics] = useState('');
 
   const fileInputRef = useRef(null);
   const coverInputRef = useRef(null);
@@ -57,6 +81,8 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
     e.preventDefault();
     if (!songUrl) return;
 
+    const lyricsData = parseCustomLyrics(songLyrics, songTitle, songArtist);
+
     const newSong = {
       id: 'custom-link-' + Date.now(),
       title: songTitle.trim() || 'Untitled Song',
@@ -65,11 +91,7 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
       cover: songCover.trim() || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80',
       url: songUrl.trim(),
       duration: 0,
-      lyrics: [
-        { time: 0, text: '🎵 (Streaming Audio Link)' },
-        { time: 5, text: `Listening to ${songTitle || 'Untitled Song'}` },
-        { time: 10, text: `by ${songArtist || 'Unknown Artist'}` }
-      ]
+      lyrics: lyricsData
     };
 
     onAddSong(newSong);
@@ -81,8 +103,8 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
     e.preventDefault();
     if (!uploadedFile) return;
 
-    // Create a local blob URL for the audio file
     const fileUrl = URL.createObjectURL(uploadedFile);
+    const lyricsData = parseCustomLyrics(uploadLyrics, uploadTitle, uploadArtist);
 
     const newSong = {
       id: 'custom-upload-' + Date.now(),
@@ -92,11 +114,7 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
       cover: uploadCoverUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80',
       url: fileUrl,
       duration: 0,
-      lyrics: [
-        { time: 0, text: '🎵 (Local Audio File)' },
-        { time: 4, text: `Playing uploaded track: ${uploadTitle || 'Untitled Track'}` },
-        { time: 8, text: `Enjoy the offline vibe!` }
-      ]
+      lyrics: lyricsData
     };
 
     onAddSong(newSong);
@@ -110,12 +128,14 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
     setSongArtist('');
     setSongAlbum('');
     setSongCover('');
+    setSongLyrics('');
     setUploadedFile(null);
     setUploadTitle('');
     setUploadArtist('');
     setUploadAlbum('Uploaded Track');
     setUploadCoverFile(null);
     setUploadCoverUrl('');
+    setUploadLyrics('');
   };
 
   return (
@@ -152,12 +172,12 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
           <form onSubmit={handleAddLinkSong}>
             <div className="modal-body">
               <div className="form-group">
-                <label className="form-label">Audio File URL (Direct link to MP3/WAV)*</label>
+                <label className="form-label">Audio File URL or YouTube Link*</label>
                 <input 
                   type="url" 
                   required 
                   className="form-input" 
-                  placeholder="https://example.com/song.mp3"
+                  placeholder="https://example.com/song.mp3 or youtube.com/watch?v=..."
                   value={songUrl}
                   onChange={(e) => setSongUrl(e.target.value)}
                 />
@@ -168,7 +188,7 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
                 <input 
                   type="text" 
                   className="form-input" 
-                  placeholder="e.g. Blinding Lights"
+                  placeholder="e.g. Starboy"
                   value={songTitle}
                   onChange={(e) => setSongTitle(e.target.value)}
                 />
@@ -190,7 +210,7 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
                 <input 
                   type="text" 
                   className="form-input" 
-                  placeholder="e.g. After Hours"
+                  placeholder="e.g. Starboy Album"
                   value={songAlbum}
                   onChange={(e) => setSongAlbum(e.target.value)}
                 />
@@ -204,6 +224,18 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
                   placeholder="https://example.com/cover.jpg"
                   value={songCover}
                   onChange={(e) => setSongCover(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Lyrics (Optional - Paste text line-by-line)</label>
+                <textarea 
+                  className="form-input" 
+                  placeholder="Paste lyrics here. We will auto-sync them for playback!"
+                  rows="4"
+                  value={songLyrics}
+                  onChange={(e) => setSongLyrics(e.target.value)}
+                  style={{ fontFamily: 'inherit', resize: 'vertical' }}
                 />
               </div>
             </div>
@@ -321,6 +353,18 @@ export default function AddSongModal({ isOpen, onClose, onAddSong }) {
                         onChange={handleCoverChange}
                       />
                     </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Lyrics (Optional - Paste text line-by-line)</label>
+                    <textarea 
+                      className="form-input" 
+                      placeholder="Paste lyrics here. We will auto-sync them for playback!"
+                      rows="4"
+                      value={uploadLyrics}
+                      onChange={(e) => setUploadLyrics(e.target.value)}
+                      style={{ fontFamily: 'inherit', resize: 'vertical' }}
+                    />
                   </div>
                 </>
               )}

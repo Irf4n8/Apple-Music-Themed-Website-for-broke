@@ -584,7 +584,7 @@ export default function App() {
   return (
     <div className="app-container">
       {/* Hidden YouTube player mount node */}
-      <div id="yt-player" style={{ display: 'none', position: 'absolute', width: 0, height: 0 }} />
+      <div id="yt-player" style={{ position: 'absolute', width: '1px', height: '1px', left: '-9999px', top: '-9999px', opacity: 0, pointerEvents: 'none' }} />
 
       {/* Dynamic Color Blur Backdrop */}
       <BackgroundGlow activeTrack={activeTrack} />
