@@ -113,6 +113,19 @@ export default function App() {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
 
+  // Sleep Timer, Shortcuts, & Visualizer States
+  const [sleepTimeLeft, setSleepTimeLeft] = useState(null);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+
+  // Visualizer References
+  const canvasRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const sourceRef = useRef(null);
+  const sleepTimeRef = useRef(null);
+
+  useEffect(() => { sleepTimeRef.current = sleepTimeLeft; }, [sleepTimeLeft]);
+
   // Audio References
   const audioRef = useRef(null);
   const ytPlayerRef = useRef(null);
@@ -181,6 +194,11 @@ export default function App() {
     };
 
     const handleEnded = () => {
+      if (sleepTimeRef.current === -1) {
+        setIsPlaying(false);
+        setSleepTimeLeft(null);
+        return;
+      }
       if (repeatRef.current) {
         audioRef.current.currentTime = 0;
         audioRef.current.play().catch(e => console.log('Replay error:', e));
@@ -257,6 +275,11 @@ export default function App() {
               } else if (event.data === 2) {
                 setIsPlaying(false);
               } else if (event.data === 0) {
+                if (sleepTimeRef.current === -1) {
+                  setIsPlaying(false);
+                  setSleepTimeLeft(null);
+                  return;
+                }
                 if (repeatRef.current) {
                   try {
                     ytPlayerRef.current.seekTo(0);
@@ -417,6 +440,163 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
     safeLocalStorage.setItem('music-player-theme', theme);
   }, [theme]);
+
+  // Web Audio Context initializer
+  const initWebAudio = () => {
+    if (!audioRef.current || audioContextRef.current) return;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      analyserRef.current.fftSize = 64; // compact fftSize for elegant bar rendering
+      
+      sourceRef.current = audioContextRef.current.createMediaElementSource(audioRef.current);
+      sourceRef.current.connect(analyserRef.current);
+      analyserRef.current.connect(audioContextRef.current.destination);
+    } catch (e) {
+      console.log('Web Audio initialization blocked or failed:', e);
+    }
+  };
+
+  // Keyboard Shortcuts system-wide listeners
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
+        return;
+      }
+
+      const key = e.key.toLowerCase();
+      if (key === ' ') {
+        e.preventDefault();
+        setIsPlaying((prev) => !prev);
+      } else if (key === 'm') {
+        e.preventDefault();
+        setIsMuted((prev) => !prev);
+      } else if (key === 'l') {
+        e.preventDefault();
+        setLyricsOpen((prev) => !prev);
+        setQueueOpen(false);
+      } else if (key === 'q') {
+        e.preventDefault();
+        setQueueOpen((prev) => !prev);
+        setLyricsOpen(false);
+      } else if (key === 'f') {
+        e.preventDefault();
+        setIsFullscreen((prev) => !prev);
+      } else if (key === 'arrowright') {
+        e.preventDefault();
+        handleSeek(Math.min(duration, currentTime + 5));
+      } else if (key === 'arrowleft') {
+        e.preventDefault();
+        handleSeek(Math.max(0, currentTime - 5));
+      } else if (key === 'arrowup') {
+        e.preventDefault();
+        setVolume((prev) => Math.min(1, prev + 0.05));
+      } else if (key === 'arrowdown') {
+        e.preventDefault();
+        setVolume((prev) => Math.max(0, prev - 0.05));
+      } else if (e.key === '?') {
+        e.preventDefault();
+        setIsShortcutsOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [duration, currentTime]);
+
+  // Sleep Timer Countdown Tick effect
+  useEffect(() => {
+    if (sleepTimeLeft === null || sleepTimeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setSleepTimeLeft((prev) => {
+        if (prev === -1) return -1;
+        if (prev <= 1) {
+          setIsPlaying(false);
+          clearInterval(timer);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [sleepTimeLeft, isPlaying]);
+
+  // Visualizer Canvas render loop
+  useEffect(() => {
+    if (!isFullscreen || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let animationFrameId;
+
+    const isYt = activeTrack && getYouTubeId(activeTrack.url);
+    if (!isYt && isPlaying) {
+      initWebAudio();
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume();
+      }
+    }
+
+    const bufferLength = analyserRef.current ? analyserRef.current.frequencyBinCount : 32;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const renderVisualizer = () => {
+      animationFrameId = requestAnimationFrame(renderVisualizer);
+
+      // Semi-transparent overlay to create premium trace trail motion blur
+      ctx.fillStyle = 'rgba(8, 8, 10, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const barWidth = (canvas.width / bufferLength) * 1.5;
+      let barHeight;
+      let x = 0;
+
+      if (!isYt && isPlaying && analyserRef.current) {
+        analyserRef.current.getByteFrequencyData(dataArray);
+      } else if (isPlaying) {
+        // Realistic procedural fallback frequency bars for YouTube streams
+        const time = Date.now() * 0.003;
+        for (let i = 0; i < bufferLength; i++) {
+          const frequency = Math.sin(time + i * 0.15) * Math.cos(time * 0.7 + i * 0.05);
+          dataArray[i] = Math.abs(frequency) * 160 + Math.random() * 20;
+        }
+      } else {
+        // Flatline idle wave
+        for (let i = 0; i < bufferLength; i++) {
+          dataArray[i] = 5 + Math.sin(i * 0.5) * 3;
+        }
+      }
+
+      for (let i = 0; i < bufferLength; i++) {
+        barHeight = (dataArray[i] / 255) * canvas.height * 0.85;
+
+        const grad = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
+        grad.addColorStop(0, '#7d1b82');
+        grad.addColorStop(1, '#fa243c');
+
+        ctx.fillStyle = grad;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#fa243c';
+
+        ctx.beginPath();
+        ctx.roundRect(x, canvas.height - barHeight, barWidth - 4, barHeight, [4, 4, 0, 0]);
+        ctx.fill();
+
+        x += barWidth;
+      }
+      ctx.shadowBlur = 0;
+    };
+
+    renderVisualizer();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [isFullscreen, isPlaying, activeTrack?.id]);
 
   // Helper: Play next track
   const playNextTrack = () => {
@@ -703,6 +883,14 @@ export default function App() {
               <p className="fullscreen-artist">{activeTrack.artist}</p>
             </div>
 
+            {/* Audio Visualizer Canvas */}
+            <canvas 
+              ref={canvasRef} 
+              className="visualizer-canvas" 
+              width={500} 
+              height={80} 
+            />
+
             {/* Large Progress bar */}
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div 
@@ -883,6 +1071,65 @@ export default function App() {
             </div>
             <div className="modal-footer">
               <button className="btn btn-primary" onClick={() => setIsInstallModalOpen(false)}>Got It</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Keyboard Shortcuts Help Modal */}
+      {isShortcutsOpen && (
+        <div className="modal-overlay" onClick={() => setIsShortcutsOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <div className="modal-header">
+              <h2 className="modal-title">Keyboard Shortcuts</h2>
+              <button className="modal-close-btn" onClick={() => setIsShortcutsOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: '0 8px 16px' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                Control your music instantly using these system-wide hotkeys:
+              </p>
+              <div className="shortcuts-grid">
+                <div className="shortcut-item">
+                  <span>Play / Pause</span>
+                  <span className="shortcut-key">Spacebar</span>
+                </div>
+                <div className="shortcut-item">
+                  <span>Mute / Unmute</span>
+                  <span className="shortcut-key">M</span>
+                </div>
+                <div className="shortcut-item">
+                  <span>Toggle Lyrics</span>
+                  <span className="shortcut-key">L</span>
+                </div>
+                <div className="shortcut-item">
+                  <span>Toggle Queue</span>
+                  <span className="shortcut-key">Q</span>
+                </div>
+                <div className="shortcut-item">
+                  <span>Toggle Fullscreen</span>
+                  <span className="shortcut-key">F</span>
+                </div>
+                <div className="shortcut-item">
+                  <span>Seek Forward 5s</span>
+                  <span className="shortcut-key">➔</span>
+                </div>
+                <div className="shortcut-item">
+                  <span>Seek Backward 5s</span>
+                  <span className="shortcut-key">⬅</span>
+                </div>
+                <div className="shortcut-item">
+                  <span>Volume Up / Down</span>
+                  <span className="shortcut-key">▲ / ▼</span>
+                </div>
+                <div className="shortcut-item" style={{ gridColumn: 'span 2', borderBottom: 'none', justifyContent: 'center', marginTop: 12 }}>
+                  <span style={{ fontSize: '0.8rem' }}>Press <strong style={{ color: 'var(--apple-accent)' }}>?</strong> anywhere to view this panel.</span>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-primary" onClick={() => setIsShortcutsOpen(false)}>Got It</button>
             </div>
           </div>
         </div>

@@ -14,7 +14,8 @@ import {
   Maximize2, 
   Heart,
   MoreHorizontal,
-  AppWindow
+  AppWindow,
+  Timer
 } from 'lucide-react';
 
 export default function PlayerBar({
@@ -39,9 +40,12 @@ export default function PlayerBar({
   queueOpen,
   onQueueToggle,
   onFullscreenToggle,
-  onMiniPlayerToggle
+  onMiniPlayerToggle,
+  sleepTimeLeft,
+  onSetSleepTimer
 }) {
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showTimerMenu, setShowTimerMenu] = useState(false);
 
   // Formatting seconds to MM:SS
   const formatTime = (timeInSeconds) => {
@@ -239,6 +243,64 @@ export default function PlayerBar({
               cursor: 'pointer'
             }}
           />
+        </div>
+
+        {/* Sleep Timer */}
+        <div className="sleep-timer-container">
+          <button 
+            className={`extra-btn ${sleepTimeLeft ? 'active' : ''}`}
+            onClick={() => setShowTimerMenu(!showTimerMenu)}
+            title="Set Sleep Timer"
+            style={{ position: 'relative' }}
+          >
+            <Timer size={16} />
+            {sleepTimeLeft > 0 && (
+              <span className="sleep-timer-badge">
+                {Math.ceil(sleepTimeLeft / 60)}m
+              </span>
+            )}
+          </button>
+          
+          {showTimerMenu && (
+            <div className="sleep-timer-menu">
+              <button 
+                className={`sleep-timer-option ${!sleepTimeLeft ? 'active' : ''}`}
+                onClick={() => { onSetSleepTimer(null); setShowTimerMenu(false); }}
+              >
+                Off
+              </button>
+              <button 
+                className={`sleep-timer-option ${sleepTimeLeft === 900 ? 'active' : ''}`}
+                onClick={() => { onSetSleepTimer(900); setShowTimerMenu(false); }}
+              >
+                15 Minutes
+              </button>
+              <button 
+                className={`sleep-timer-option ${sleepTimeLeft === 1800 ? 'active' : ''}`}
+                onClick={() => { onSetSleepTimer(1800); setShowTimerMenu(false); }}
+              >
+                30 Minutes
+              </button>
+              <button 
+                className={`sleep-timer-option ${sleepTimeLeft === 2700 ? 'active' : ''}`}
+                onClick={() => { onSetSleepTimer(2700); setShowTimerMenu(false); }}
+              >
+                45 Minutes
+              </button>
+              <button 
+                className={`sleep-timer-option ${sleepTimeLeft === 3600 ? 'active' : ''}`}
+                onClick={() => { onSetSleepTimer(3600); setShowTimerMenu(false); }}
+              >
+                60 Minutes
+              </button>
+              <button 
+                className={`sleep-timer-option ${sleepTimeLeft === -1 ? 'active' : ''}`}
+                onClick={() => { onSetSleepTimer(-1); setShowTimerMenu(false); }}
+              >
+                End of Song
+              </button>
+            </div>
+          )}
         </div>
 
         <button 
