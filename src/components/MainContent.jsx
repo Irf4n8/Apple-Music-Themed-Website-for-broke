@@ -272,6 +272,61 @@ export default function MainContent({
           </button>
         </div>
 
+        {/* Continue Listening dashboard card if activeTrack is set */}
+        {activeTrack && (
+          <div 
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              boxShadow: 'var(--shadow-sm)'
+            }}
+            onClick={() => onPlaySong(activeTrack)}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }}>
+              <img 
+                src={activeTrack.cover} 
+                alt="" 
+                style={{ width: '48px', height: '48px', borderRadius: '6px', objectFit: 'cover', boxShadow: 'var(--shadow-sm)' }} 
+              />
+              <div style={{ textAlign: 'left' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--apple-accent)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {isPlaying ? 'Now Playing' : 'Continue Listening'}
+                </span>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>{activeTrack.title}</h4>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{activeTrack.artist} &bull; {activeTrack.album}</p>
+              </div>
+            </div>
+            
+            <button 
+              className="btn btn-primary" 
+              style={{
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 0
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPlaySong(activeTrack);
+              }}
+            >
+              {isPlaying ? (
+                <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>❚❚</div>
+              ) : (
+                <Play size={16} fill="currentColor" style={{ marginLeft: '2px' }} />
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Categories / Grid items */}
         <div>
           <h3 className="section-title">Recently Played</h3>

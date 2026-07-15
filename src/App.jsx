@@ -106,6 +106,13 @@ export default function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Mini Player & Install App States
+  const [isMiniPlayer, setIsMiniPlayer] = useState(false);
+  const [miniPlayerPos, setMiniPlayerPos] = useState({ x: window.innerWidth - 320, y: window.innerHeight - 380 });
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+
   // Audio References
   const audioRef = useRef(null);
   const ytPlayerRef = useRef(null);
@@ -582,7 +589,7 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${isMiniPlayer ? 'mini-player-layout' : ''}`}>
       {/* Hidden YouTube player mount node */}
       <div id="yt-player" style={{ position: 'absolute', width: '1px', height: '1px', left: '-9999px', top: '-9999px', opacity: 0, pointerEvents: 'none' }} />
 
@@ -598,6 +605,7 @@ export default function App() {
         onAddSongClick={() => setIsAddModalOpen(true)}
         playlists={playlists}
         onCreatePlaylistClick={handleCreatePlaylist}
+        onInstallClick={() => setIsInstallModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -646,6 +654,7 @@ export default function App() {
           if (lyricsOpen) setLyricsOpen(false);
         }}
         onFullscreenToggle={() => setIsFullscreen(true)}
+        onMiniPlayerToggle={() => setIsMiniPlayer(!isMiniPlayer)}
       />
 
       {/* Sliding Lyrics Panel */}
@@ -758,6 +767,126 @@ export default function App() {
           </div>
         )}
       </div>
+
+      {/* Draggable Mini-Player Widget Overlay */}
+      {isMiniPlayer && activeTrack && (
+        <div 
+          className="mini-player-card"
+          style={{ 
+            left: `${miniPlayerPos.x}px`, 
+            top: `${miniPlayerPos.y}px` 
+          }}
+        >
+          {/* Drag Handle */}
+          <div 
+            className="mini-player-drag-handle"
+            onPointerDown={(e) => {
+              dragStartRef.current = { 
+                x: e.clientX - miniPlayerPos.x, 
+                y: e.clientY - miniPlayerPos.y 
+              };
+              setIsDragging(true);
+              e.currentTarget.setPointerCapture(e.pointerId);
+            }}
+            onPointerMove={(e) => {
+              if (!isDragging) return;
+              const newX = Math.min(window.innerWidth - 300, Math.max(10, e.clientX - dragStartRef.current.x));
+              const newY = Math.min(window.innerHeight - 340, Math.max(10, e.clientY - dragStartRef.current.y));
+              setMiniPlayerPos({ x: newX, y: newY });
+            }}
+            onPointerUp={(e) => {
+              setIsDragging(false);
+              e.currentTarget.releasePointerCapture(e.pointerId);
+            }}
+          >
+            <div className="mini-player-drag-bar" />
+            <button 
+              className="mini-player-close" 
+              onClick={() => setIsMiniPlayer(false)}
+              title="Restore Player"
+            >
+              <X size={15} />
+            </button>
+          </div>
+
+          {/* Album Cover */}
+          <div className="mini-player-art-container">
+            <img 
+              src={activeTrack.cover} 
+              alt="" 
+              className={`mini-player-art ${isPlaying ? 'mini-player-spinning' : ''}`} 
+            />
+          </div>
+
+          {/* Song Meta */}
+          <div className="mini-player-details">
+            <div className="mini-player-title">{activeTrack.title}</div>
+            <div className="mini-player-artist">{activeTrack.artist}</div>
+          </div>
+
+          {/* Controls */}
+          <div className="mini-player-controls">
+            <button className="control-btn" onClick={playPrevTrack}>
+              <SkipBack size={18} fill="currentColor" />
+            </button>
+            <button 
+              className="control-btn play-btn" 
+              onClick={() => setIsPlaying(!isPlaying)}
+              style={{ width: '40px', height: '40px', background: 'var(--text-primary)', color: 'var(--bg-app)', borderRadius: '50%' }}
+            >
+              {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" style={{ marginLeft: '2px' }} />}
+            </button>
+            <button className="control-btn" onClick={playNextTrack}>
+              <SkipForward size={18} fill="currentColor" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* PWA Install Instructions Modal */}
+      {isInstallModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsInstallModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '420px' }}>
+            <div className="modal-header">
+              <h2 className="modal-title">Install Web App</h2>
+              <button className="modal-close-btn" onClick={() => setIsInstallModalOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '16px', lineHeight: '1.4' }}>
+                Run this music player as a lightweight standalone app on your device for quick access, offline boot, and distraction-free listening!
+              </p>
+              <div className="pwa-list">
+                <div className="pwa-step">
+                  <span className="pwa-badge">1</span>
+                  <div>
+                    <strong style={{ color: 'var(--text-primary)' }}>On iPhone / iPad (Safari)</strong>
+                    <p style={{ marginTop: 2, fontSize: '0.8rem' }}>Tap the <strong>Share</strong> button at the bottom of Safari, scroll down, and select <strong>Add to Home Screen</strong>.</p>
+                  </div>
+                </div>
+                <div className="pwa-step">
+                  <span className="pwa-badge">2</span>
+                  <div>
+                    <strong style={{ color: 'var(--text-primary)' }}>On Android (Chrome)</strong>
+                    <p style={{ marginTop: 2, fontSize: '0.8rem' }}>Tap the three dots menu at the top-right, and select <strong>Add to Home Screen</strong> or <strong>Install App</strong>.</p>
+                  </div>
+                </div>
+                <div className="pwa-step">
+                  <span className="pwa-badge">3</span>
+                  <div>
+                    <strong style={{ color: 'var(--text-primary)' }}>On Desktop (Chrome, Edge, Brave)</strong>
+                    <p style={{ marginTop: 2, fontSize: '0.8rem' }}>Click the <strong>Install</strong> icon (computer screen with down-arrow) in the browser URL address bar.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-primary" onClick={() => setIsInstallModalOpen(false)}>Got It</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

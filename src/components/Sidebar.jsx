@@ -20,7 +20,8 @@ export default function Sidebar({
   setSearchQuery, 
   onAddSongClick,
   playlists = [],
-  onCreatePlaylistClick
+  onCreatePlaylistClick,
+  onInstallClick
 }) {
   return (
     <aside className="sidebar">
@@ -112,11 +113,19 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* Add Music Action Button */}
-      <div className="sidebar-group" style={{ marginTop: 'auto', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
+      {/* Add Music & PWA Install Button */}
+      <div className="sidebar-group" style={{ marginTop: 'auto', borderTop: '1px solid var(--border-color)', paddingTop: '16px', gap: '8px' }}>
         <button className="sidebar-item" onClick={onAddSongClick} style={{ color: 'var(--apple-accent)', fontWeight: 600 }}>
           <PlusCircle size={18} />
           <span>Add Custom Song</span>
+        </button>
+        <button 
+          className="sidebar-item" 
+          onClick={onInstallClick} 
+          style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}
+        >
+          <Compass size={18} />
+          <span>Install Web App</span>
         </button>
       </div>
     </aside>

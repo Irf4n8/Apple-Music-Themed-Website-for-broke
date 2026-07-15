@@ -13,7 +13,8 @@ import {
   ListMusic, 
   Maximize2, 
   Heart,
-  MoreHorizontal
+  MoreHorizontal,
+  AppWindow
 } from 'lucide-react';
 
 export default function PlayerBar({
@@ -37,7 +38,8 @@ export default function PlayerBar({
   onLyricsToggle,
   queueOpen,
   onQueueToggle,
-  onFullscreenToggle
+  onFullscreenToggle,
+  onMiniPlayerToggle
 }) {
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -97,7 +99,22 @@ export default function PlayerBar({
         <div className="player-text-details">
           <span className="player-song-title">
             {activeTrack.title}
-            {activeTrack.id === '4' && <span className="explicit-tag">E</span>} {/* Sora is explicit in our mock! */}
+            {activeTrack.id === '4' && <span className="explicit-tag">E</span>}
+            
+            {/* Audio Quality Badge */}
+            <span className="audio-quality-badge-container">
+              <span className="audio-quality-badge">
+                {activeTrack.url && (activeTrack.url.includes('youtube.com') || activeTrack.url.includes('youtu.be')) ? 'HQ' : 'Lossless'}
+              </span>
+              <span className="audio-tooltip">
+                <strong>Audio Stream Quality</strong>
+                <span style={{ display: 'block', marginTop: 4 }}>
+                  {activeTrack.url && (activeTrack.url.includes('youtube.com') || activeTrack.url.includes('youtu.be')) 
+                    ? 'Source: YouTube Streaming (AAC 256kbps) optimized for web.' 
+                    : 'Source: ALAC Lossless (24-bit/48kHz) high-fidelity audio stream.'}
+                </span>
+              </span>
+            </span>
           </span>
           <span className="player-artist">{activeTrack.artist}</span>
         </div>
@@ -223,6 +240,14 @@ export default function PlayerBar({
             }}
           />
         </div>
+
+        <button 
+          className="extra-btn"
+          onClick={onMiniPlayerToggle}
+          title="Open Mini-Player"
+        >
+          <AppWindow size={16} />
+        </button>
 
         <button 
           className="extra-btn"
